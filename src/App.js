@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import './App.css';
 
 import firebase from 'firebase/app';
@@ -7,7 +7,6 @@ import 'firebase/auth';
 
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
-import { createPortal } from 'react-dom';
 
 firebase.initializeApp({
   apiKey: "AIzaSyDfcYe2yefQl-wJc-ZvgNZcJ-5uxvpGqWY",
@@ -59,6 +58,8 @@ function SignOut() {
 }
 
 function ChatRoom() {
+
+  const dummy = useRef();
   const messagesRef = firestore.collection('messages');
   const query = messagesRef.orderBy('createdAt').limit(25);
 
@@ -79,14 +80,17 @@ function ChatRoom() {
       photoURL
     })
     setFormValue('');
+    dummy.current.scrollIntoView({ behaviour: 'smooth' });
   }
 
   return (
     <>
-      <div>
+      <main>
         {messages && messages.map(msg => <ChatMessage key={msg.id} message={msg} />)}
-      </div>
-      <form>
+        <div ref={dummy}></div>
+      </main>
+
+      <form onSubmit={sendMessage}>
         <input value={formValue} onChange={(e) => setFormValue(e.target.value)} />
         <button type="submit">Send</button>
       </form>
@@ -100,7 +104,7 @@ function ChatMessage(props) {
 
   return (
     <div className={`message ${messageClass}`}>
-      <img src={photoURL} />
+      <img src={photoURL || 'https://api.adorable.io/avatars/23/abott@adorable.png'} alt="" />
       <p>{text}</p>
     </div>
   )
